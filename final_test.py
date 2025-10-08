@@ -19,7 +19,7 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 # Method 2: Hardcoded API key (TEMPORARY - After testing, move to .env file!)
 if not api_key:
-    api_key = "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"
+    api_key = "insert api key here"
 
 # Validation
 if not api_key:
@@ -287,4 +287,5 @@ if __name__ == '__main__':
     print("\n💡 Next step: Open debate_agent.html in your browser")
     print("⚠️ Keep this terminal window open!\n")
     
+
     app.run(port=5000, debug=True)
