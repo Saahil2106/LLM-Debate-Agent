@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Debate Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .scoreboard {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .scoreboard h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .score-label {
+            font-weight: 600;
+        }
+
+        .score-value {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .pro-score {
+            color: #10b981;
+        }
+
+        .con-score {
+            color: #ef4444;
+        }
+
+        .controls {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 20px;
+        }
+
+        .control-section h4 {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .debate-topic {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .round-indicator {
+            background: #667eea;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: #f9fafb;
+        }
+
+        .message {
+            margin-bottom: 24px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .position-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .pro-badge {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .con-badge {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .judge-badge {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .message-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            line-height: 1.6;
+        }
+
+        .score-display {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .input-area {
+            padding: 20px 30px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .prompt-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .prompt-item {
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .prompt-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .prompt-template {
+            font-size: 13px;
+            color: #6b7280;
+            font-family: 'Courier New', monospace;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-subtext {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>🎯 AI Debate Agent</h2>
+                <p>Strategic argumentation system</p>
+            </div>
+
+            <div class="scoreboard">
+                <h3>Current Scores</h3>
+                <div class="score-item">
+                    <span class="score-label">🤝 PRO</span>
+                    <span class="score-value pro-score" id="proScore">0</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">🚫 CON</span>
+                    <span class="score-value con-score" id="conScore">0</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-section">
+                    <h4>Debate Controls</h4>
+                    <button class="btn btn-primary" id="startDebateBtn">
+                        🚀 Start New Debate
+                    </button>
+                    <button class="btn btn-success" id="nextRoundBtn" disabled>
+                        ➡️ Next Round
+                    </button>
+                    <button class="btn btn-danger" id="endDebateBtn" disabled>
+                        🏁 End Debate
+                    </button>
+                </div>
+
+                <div class="control-section">
+                    <h4>Prompt Management</h4>
+                    <button class="btn btn-secondary" id="addPromptBtn">
+                        ➕ Add Prompt
+                    </button>
+                    <button class="btn btn-secondary" id="viewPromptsBtn">
+                        📋 View Prompts
+                    </button>
+                </div>
+
+                <div class="control-section">
+                    <h4>Actions</h4>
+                    <button class="btn btn-secondary" id="clearChatBtn">
+                        🗑️ Clear Chat
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="chat-header">
+                <div class="debate-topic" id="debateTopic">No active debate</div>
+                <div class="round-indicator" id="roundIndicator">Round 0</div>
+            </div>
+
+            <div class="chat-area" id="chatArea">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <div class="empty-state-text">No debate in progress</div>
+                    <div class="empty-state-subtext">Click "Start New Debate" to begin</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div class="input-group">
+                    <input type="text" id="messageInput" placeholder="Enter debate topic..." disabled>
+                    <button class="send-btn" id="sendBtn" disabled>Start</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Debate Modal -->
+    <div class="modal" id="startDebateModal">
+        <div class="modal-content">
+            <div class="modal-header">Start New Debate</div>
+            <div class="form-group">
+                <label>Debate Topic</label>
+                <input type="text" id="topicInput" placeholder="e.g., Should AI replace human judges?">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('startDebateModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="startDebate()">Start Debate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Prompt Modal -->
+    <div class="modal" id="addPromptModal">
+        <div class="modal-content">
+            <div class="modal-header">Add Custom Prompt</div>
+            <div class="form-group">
+                <label>Prompt Name</label>
+                <input type="text" id="promptName" placeholder="e.g., aggressive_debate">
+            </div>
+            <div class="form-group">
+                <label>Prompt Template</label>
+                <textarea id="promptTemplate" placeholder="Use {topic}, {position}, {round_num}, {context} as variables"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('addPromptModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="savePrompt()">Save Prompt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Prompts Modal -->
+    <div class="modal" id="viewPromptsModal">
+        <div class="modal-content">
+            <div class="modal-header">Available Prompts</div>
+            <div class="prompt-list" id="promptList"></div>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal('viewPromptsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_URL = 'http://localhost:5000';
+        
+        // State management
+        let debateState = {
+            active: false,
+            topic: '',
+            round: 0,
+            proScore: 0,
+            conScore: 0,
+            history: [],
+            prompts: {},
+            useAPI: true  // Toggle to use real API or mock data
+        };
+        
+        // Check API connection on load
+        async function checkAPIConnection() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                if (response.ok) {
+                    debateState.useAPI = true;
+                    addSystemMessage('✅ Connected to AI backend - Using real OpenAI API');
+                    loadPrompts();
+                } else {
+                    throw new Error('Server responded but not healthy');
+                }
+            } catch (error) {
+                debateState.useAPI = false;
+                addSystemMessage('⚠️ Backend not connected - Using demo mode (fake responses)');
+                console.error('API Connection Error:', error);
+            }
+        }
+
+        // DOM elements
+        const chatArea = document.getElementById('chatArea');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const startDebateBtn = document.getElementById('startDebateBtn');
+        const nextRoundBtn = document.getElementById('nextRoundBtn');
+        const endDebateBtn = document.getElementById('endDebateBtn');
+        const addPromptBtn = document.getElementById('addPromptBtn');
+        const viewPromptsBtn = document.getElementById('viewPromptsBtn');
+        const clearChatBtn = document.getElementById('clearChatBtn');
+
+        // Event listeners
+        startDebateBtn.addEventListener('click', () => openModal('startDebateModal'));
+        nextRoundBtn.addEventListener('click', nextRound);
+        endDebateBtn.addEventListener('click', endDebate);
+        addPromptBtn.addEventListener('click', () => openModal('addPromptModal'));
+        viewPromptsBtn.addEventListener('click', showPrompts);
+        clearChatBtn.addEventListener('click', clearChat);
+        sendBtn.addEventListener('click', handleSend);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSend();
+        });
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function startDebate() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                alert('Please enter a debate topic');
+                return;
+            }
+
+            debateState = {
+                ...debateState,
+                active: true,
+                topic: topic,
+                round: 0,
+                proScore: 0,
+                conScore: 0,
+                history: []
+            };
+
+            updateUI();
+            closeModal('startDebateModal');
+            document.getElementById('topicInput').value = '';
+            
+            addSystemMessage(`🎯 Debate started: "${topic}"`);
+            nextRound();
+        }
+
+        function nextRound() {
+            if (!debateState.active) return;
+
+            debateState.round++;
+            updateUI();
+            
+            nextRoundBtn.disabled = true;
+            
+            if (debateState.useAPI) {
+                addSystemMessage(`⏳ Round ${debateState.round} starting... (AI is thinking, this takes 10-20 seconds)`);
+            } else {
+                addSystemMessage(`⏳ Round ${debateState.round} starting... (Demo mode - instant responses)`);
+            }
+
+            // Generate PRO argument
+            generateArgument('pro').then(proArg => {
+                addMessage('pro', proArg, debateState.round);
+                
+                // Generate CON argument
+                return generateArgument('con');
+            }).then(conArg => {
+                addMessage('con', conArg, debateState.round);
+                
+                // Get the actual arguments from history
+                const proArg = debateState.history[debateState.history.length - 2].argument;
+                
+                // Judge the round
+                return judgeRound(proArg, conArg);
+            }).then(judgment => {
+                addJudgment(judgment);
+                debateState.proScore += judgment.proScore;
+                debateState.conScore += judgment.conScore;
+                updateScores();
+                nextRoundBtn.disabled = false;
+            }).catch(error => {
+                addSystemMessage(`❌ Error: ${error.message}`);
+                console.error('Round error:', error);
+                nextRoundBtn.disabled = false;
+            });
+        }
+
+        async function generateArgument(position) {
+            // Log to help debug
+            console.log(`Generating ${position} argument, useAPI:`, debateState.useAPI);
+            
+            if (!debateState.useAPI) {
+                console.log('Using mock data (API not connected)');
+                return generateMockArgument(position);
+            }
+            
+            const context = debateState.history.map((h, i) => 
+                `Round ${h.round} - ${h.position.toUpperCase()}: ${h.argument}`
+            ).join('\n\n');
+
+            try {
+                console.log(`Calling API for ${position} argument...`);
+                const response = await fetch(`${API_URL}/debate/argument`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        topic: debateState.topic,
+                        position: position,
+                        round: debateState.round,
+                        context: context || 'No previous arguments.'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API returned ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log(`✅ Received ${position} argument from API`);
+                return data.argument;
+            } catch (error) {
+                console.error('API Error:', error);
+                addSystemMessage(`⚠️ API call failed, using fallback. Error: ${error.message}`);
+                return generateMockArgument(position);
+            }
+        }
+
+        function generateMockArgument(position) {
+            const args = {
+                pro: [
+                    `As a strong proponent, I argue that ${debateState.topic} because it promotes progress, innovation, and positive change. The evidence clearly shows multiple benefits including improved efficiency, better outcomes, and long-term sustainability.`,
+                    `Building on previous points, the ${position} position is strengthened by real-world examples and empirical data. Studies consistently demonstrate that this approach leads to measurable improvements across key metrics.`,
+                    `In direct response to the opposition, their concerns are either overstated or can be mitigated through proper implementation. The benefits far outweigh any potential drawbacks, making this the logical choice.`
+                ],
+                con: [
+                    `I must respectfully disagree with the ${debateState.topic}. While it may seem appealing on the surface, deeper analysis reveals significant concerns including potential risks, unintended consequences, and ethical considerations that cannot be ignored.`,
+                    `The opposition's arguments fail to account for critical factors such as cost, feasibility, and real-world constraints. Historical precedents show that similar approaches have led to problems that we should learn from.`,
+                    `Let me address the previous points directly: the claimed benefits are exaggerated while the risks are minimized. A more balanced, cautious approach would serve society better than rushing into this decision.`
+                ]
+            };
+
+            const index = Math.min(debateState.round - 1, args[position].length - 1);
+            return args[position][index];
+        }
+
+        async function judgeRound(proArg, conArg) {
+            if (!debateState.useAPI) {
+                return generateMockJudgment();
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/debate/judge`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        topic: debateState.topic,
+                        pro_argument: proArg,
+                        con_argument: conArg
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to judge round');
+                }
+
+                const data = await response.json();
+                return {
+                    proScore: data.pro_score,
+                    conScore: data.con_score,
+                    feedback: data.feedback
+                };
+            } catch (error) {
+                console.error('API Error:', error);
+                return generateMockJudgment();
+            }
+        }
+
+        function generateMockJudgment() {
+            const proScore = Math.floor(Math.random() * 3) + 7;
+            const conScore = Math.floor(Math.random() * 3) + 7;
+            
+            const feedback = `Both sides presented strong arguments. The PRO side scored ${proScore}/10 for compelling evidence and logical consistency. The CON side scored ${conScore}/10 for addressing counterarguments effectively. ${proScore > conScore ? 'PRO' : conScore > proScore ? 'CON' : 'Both sides'} ${proScore === conScore ? 'performed equally well' : 'had a slight edge'} this round.`;
+            
+            return { proScore, conScore, feedback };
+        }
+
+        function addMessage(position, content, round) {
+            const badge = position === 'pro' ? 'pro-badge' : 'con-badge';
+            const label = position === 'pro' ? '🤝 PRO' : '🚫 CON';
+            
+            const message = document.createElement('div');
+            message.className = 'message';
+            message.innerHTML = `
+                <div class="message-header">
+                    <span class="position-badge ${badge}">${label}</span>
+                    <span style="color: #9ca3af; font-size: 13px;">Round ${round}</span>
+                </div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            chatArea.appendChild(message);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            debateState.history.push({ round, position, argument: content });
+        }
+
+        function addJudgment(judgment) {
+            const message = document.createElement('div');
+            message.className = 'message';
+            message.innerHTML = `
+                <div class="message-header">
+                    <span class="position-badge judge-badge">⚖️ JUDGE</span>
+                </div>
+                <div class="message-content">
+                    ${judgment.feedback}
+                    <div style="margin-top: 12px;">
+                        <span class="score-display">PRO: ${judgment.proScore}/10</span>
+                        <span class="score-display">CON: ${judgment.conScore}/10</span>
+                    </div>
+                </div>
+            `;
+            
+            chatArea.appendChild(message);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const message = document.createElement('div');
+            message.className = 'message';
+            message.innerHTML = `
+                <div class="message-content" style="background: #f3f4f6; border-left: 4px solid #667eea;">
+                    ${text}
+                </div>
+            `;
+            
+            chatArea.appendChild(message);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function endDebate() {
+            if (!debateState.active) return;
+
+            const winner = debateState.proScore > debateState.conScore ? '🤝 PRO' : 
+                          debateState.conScore > debateState.proScore ? '🚫 CON' : '🤝 TIE';
+            const margin = Math.abs(debateState.proScore - debateState.conScore);
+            
+            addSystemMessage(`
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 16px;">🏁 Debate Concluded</div>
+                    <div style="font-size: 18px; margin-bottom: 12px;">Winner: <strong>${winner}</strong></div>
+                    <div style="font-size: 16px; color: #6b7280;">
+                        Final Score: PRO ${debateState.proScore} - CON ${debateState.conScore}
+                        ${margin > 0 ? ` (${margin} point margin)` : ''}
+                    </div>
+                </div>
+            `);
+
+            debateState.active = false;
+            updateUI();
+        }
+
+        function savePrompt() {
+            const name = document.getElementById('promptName').value.trim();
+            const template = document.getElementById('promptTemplate').value.trim();
+            
+            if (!name || !template) {
+                alert('Please fill in both fields');
+                return;
+            }
+
+            if (debateState.useAPI) {
+                fetch(`${API_URL}/prompts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, template })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    debateState.prompts = data.prompts;
+                    closeModal('addPromptModal');
+                    document.getElementById('promptName').value = '';
+                    document.getElementById('promptTemplate').value = '';
+                    addSystemMessage(`✅ Prompt "${name}" added successfully!`);
+                })
+                .catch(error => {
+                    alert('Failed to save prompt: ' + error.message);
+                });
+            } else {
+                debateState.prompts[name] = template;
+                closeModal('addPromptModal');
+                document.getElementById('promptName').value = '';
+                document.getElementById('promptTemplate').value = '';
+                addSystemMessage(`✅ Prompt "${name}" added successfully!`);
+            }
+        }
+
+        async function loadPrompts() {
+            if (!debateState.useAPI) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/prompts`);
+                if (response.ok) {
+                    debateState.prompts = await response.json();
+                }
+            } catch (error) {
+                console.error('Failed to load prompts:', error);
+            }
+        }
+
+        function showPrompts() {
+            const promptList = document.getElementById('promptList');
+            promptList.innerHTML = '';
+            
+            const promptsToShow = debateState.useAPI && Object.keys(debateState.prompts).length > 0 
+                ? debateState.prompts 
+                : {
+                    'strategic_debate': 'Strategic debate prompt with context analysis',
+                    'opening_statement': 'Compelling opening statement prompt',
+                    'judge_round': 'Impartial judging prompt'
+                };
+            
+            Object.entries(promptsToShow).forEach(([name, template]) => {
+                const item = document.createElement('div');
+                item.className = 'prompt-item';
+                item.innerHTML = `
+                    <div class="prompt-name">${name}</div>
+                    <div class="prompt-template">${typeof template === 'string' ? template.substring(0, 100) : 'Custom prompt'}${typeof template === 'string' && template.length > 100 ? '...' : ''}</div>
+                `;
+                promptList.appendChild(item);
+            });
+            
+            openModal('viewPromptsModal');
+        }
+
+        function clearChat() {
+            chatArea.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <div class="empty-state-text">Chat cleared</div>
+                    <div class="empty-state-subtext">Debate state preserved</div>
+                </div>
+            `;
+        }
+
+        function handleSend() {
+            const value = messageInput.value.trim();
+            if (!value) return;
+
+            if (!debateState.active) {
+                debateState.topic = value;
+                startDebate();
+            }
+            
+            messageInput.value = '';
+        }
+
+        function updateUI() {
+            document.getElementById('debateTopic').textContent = 
+                debateState.active ? debateState.topic : 'No active debate';
+            document.getElementById('roundIndicator').textContent = 
+                `Round ${debateState.round}`;
+            
+            nextRoundBtn.disabled = !debateState.active;
+            endDebateBtn.disabled = !debateState.active;
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            sendBtn.textContent = debateState.active ? 'Send' : 'Start';
+        }
+
+        function updateScores() {
+            document.getElementById('proScore').textContent = debateState.proScore;
+            document.getElementById('conScore').textContent = debateState.conScore;
+        }
+
+        // Initialize
+        updateUI();
+        checkAPIConnection();
+    </script>
+</body>
+</html>
