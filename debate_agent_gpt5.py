@@ -35,7 +35,7 @@ RETRIES = 3
 api_key = os.getenv("OPENAI_API_KEY")
 
 if not api_key:
-    api_key = "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"  # temporary fallback
+    api_key = "insert your api key here"  # temporary fallback
 
 if not api_key or api_key == "sk-proj-YOUR-KEY-HERE":
     print("=" * 60)
@@ -274,3 +274,4 @@ if __name__ == '__main__':
     print("=" * 60 + "\n")
 
     app.run(port=5000, debug=True)
+
