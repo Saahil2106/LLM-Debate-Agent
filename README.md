@@ -278,9 +278,7 @@ Contributions are welcome! Here's how you can help:
 - [ ] Multi-language support
 - [ ] Voice synthesis for arguments
 
-## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
