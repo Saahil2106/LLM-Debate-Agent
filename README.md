@@ -290,9 +290,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter)
+Your Name - [@yourtwitter](https://www.linkedin.com/in/saahil-jawale-02b930211/)
 
-Project Link: [https://github.com/yourusername/ai-debate-agent](https://github.com/yourusername/ai-debate-agent)
+Project Link: [https://github.com/yourusername/ai-debate-agent](https://github.com//ai-debate-agent)
 
 ---
 
